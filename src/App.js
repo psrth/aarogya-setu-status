@@ -1,23 +1,18 @@
 import './App.css';
+import Header from "./components/Header"
+import Form from "./components/Form"
+import FormTwo from "./components/FormTwo"
+import DataTable from "./components/DataTable"
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return(
+      <div className="App">
+        <Header />
+        <Form />
+        <FormTwo />
+        <DataTable />
+      </div>
+    );
 }
 
 export default App;
