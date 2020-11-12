@@ -18,16 +18,16 @@ const dummyData = Array(10)
     const y = Math.random() > 0.5;
     return {
       mobile_number,
-      status: y ? "COVID positive" : "COVID negative",
-      color: y ? "#00ff00" : "#ff0000",
+      message: y ? "COVID positive" : "COVID negative",
+      colour: y ? "#00ff00" : "#ff0000",
     };
   });
 
-const SingleModalContent = ({ status, color, mobile_number }) => (
+const SingleModalContent = ({ message, color, mobile_number }) => (
   <div>
     <div className={`text-center text-lg`}>{mobile_number}</div>
     <div className={`text-center my-5`} style={{ color }}>
-      {status}
+      {message}
     </div>
   </div>
 );
@@ -45,74 +45,98 @@ function Home() {
   }, []);
 
   const handleSingleNumber = async (number) => {
-    setLoading(true);
-    setMessage(false);
+    try {
+      setLoading(true);
+      setMessage(false);
 
-    const user = await Auth.currentAuthenticatedUser();
-    const token = user.signInUserSession.idToken.jwtToken;
+      const user = await Auth.currentAuthenticatedUser();
+      const token = user.signInUserSession.idToken.jwtToken;
 
-    const res = await (
-      await fetch(
-        "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/status",
-        {
-          method: "post",
-          mode: "no-cors",
-          headers: { Authorization: token },
-          body: JSON.stringify({ mobile_number: number }),
-        }
-      )
-    ).json();
+      const res = await (
+        await fetch(
+          "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/status",
+          {
+            method: "post",
+            headers: { Authorization: token },
+            body: JSON.stringify({ mobile_number: number }),
+          }
+        )
+      ).json();
 
-    console.log({ res });
+      setModalContent(() => (
+        <SingleModalContent
+          {...{
+            mobile_number: res.mobile_number,
+            colour: res.colour === "#FFFFFF" ? "#000000" : res.colour,
+            message: res.message,
+          }}
+        />
+      ));
+      setModalVisible(true);
 
-    setModalContent(() => (
-      <SingleModalContent
-        {...{
-          mobile_number: res.mobile_number,
-          colour: res.colour === "#FFFFFF" ? "#000000" : res.colour,
-          status: res.message,
-        }}
-      />
-    ));
-    setModalVisible(true);
-
-    setLoading(false);
+      setLoading(false);
+    } catch (e) {
+      console.error(e);
+      setError("An error occurred");
+      setLoading(false);
+    }
   };
 
   const handleMultipleNumbers = async (raw) => {
-    setLoading(true);
-    setMessage(false);
-    setError(false);
-    const numbers = raw.split(",").map((x) => x.trim());
-    const user = await Auth.currentAuthenticatedUser();
-    const token = user.signInUserSession.idToken.jwtToken;
+    try {
+      setLoading(true);
+      setMessage(false);
+      setError(false);
+      const numbers = raw.split(",").map((x) => x.trim());
+      // const apiName = awsconfig.aws_cloud_logic_custom[0].name; // replace this with your api name.
+      // const path = "/bulk_status"; //replace this with the path you have configured on your API
+      // const user = await Auth.currentAuthenticatedUser();
+      // const token = user.signInUserSession.idToken.jwtToken;
+      // const myInit = {
+      //   response: true,
+      //   headers: {
+      //     Authorization: token,
+      //   },
+      //   body: { numbers }, // replace this with attributes you need
+      // };
 
-    const res = await (
-      await fetch(
-        "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/batch",
-        // GET: "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/refresh",
-        {
-          method: "post",
-          mode: "no-cors",
-          headers: { Authorization: token },
-          body: JSON.stringify({ mobile_numbers: numbers }),
-        }
-      )
-    ).text();
+      // const res = await API.post(apiName, path, myInit);
+      // console.log({ res });
 
-    console.log({ res });
+      const user = await Auth.currentAuthenticatedUser();
+      const token = user.signInUserSession.idToken.jwtToken;
 
-    // if (Math.random() < 0.1) {
-    //   setError("An error occurred");
-    //   setData([]);
-    // } else {
-    // setMessage("Numbers sent to server. Press refresh to view statuses.");
-    // setData(dummyData);
-    // }
-    setMessage("Numbers sent to server. Press refresh to view statuses.");
-    setData([]);
+      const res = await (
+        await fetch(
+          "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/bulk_status",
+          {
+            method: "post",
+            mode: "no-cors",
+            headers: { Authorization: token },
+            body: JSON.stringify({ numbers: numbers }),
+          }
+        )
+      ).json();
 
-    setLoading(false);
+      console.log({ res });
+
+      // if (Math.random() < 0.1) {
+      //   setError("An error occurred");
+      //   setData([]);
+      // } else {
+      // setMessage("Numbers sent to server. Press refresh to view statuses.");
+      // setData(dummyData);
+      // }
+      setMessage("Numbers sent to server. Press refresh to view statuses.");
+      setData([]);
+
+      setLoading(false);
+    } catch (e) {
+      console.error(e);
+      setError("An error occurred");
+      setData([]);
+      setLoading(false);
+    }
   };
 
   const handleRefresh = async () => {
@@ -125,22 +149,18 @@ function Home() {
 
     const res = await (
       await fetch(
-        "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/refresh",
-        // GET: "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/refresh",
+        "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/scan",
         {
-          mode: "no-cors",
           headers: { Authorization: token },
         }
       )
-    ).text();
+    ).json();
 
-    console.log({ res });
     if (Math.random() < 0.1) {
       setError("An error occurred");
       setData([]);
     } else {
-      setMessage("Numbers sent to server. Press refresh to view statuses.");
-      setData(dummyData);
+      setData(res);
     }
 
     setLoading(false);

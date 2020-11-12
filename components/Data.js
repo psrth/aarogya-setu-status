@@ -30,7 +30,7 @@ export default function Table({ onRefresh, data }) {
               Status
             </th>
           </tr>
-          {data.map(({ mobile_number, status, color }, i) => (
+          {data.map(({ mobile_number, message, colour }, i) => (
             <tr key={i}>
               <td
                 className={`px-3 py-4 text-center ${
@@ -41,9 +41,9 @@ export default function Table({ onRefresh, data }) {
               </td>
               <td
                 className={`px-3 py-4 text-center`}
-                style={{ background: `${color}20` }}
+                style={{ background: `${colour}20` }}
               >
-                {status}
+                {message}
               </td>
             </tr>
           ))}
