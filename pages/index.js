@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import SweetAlert from "sweetalert-react";
+import Amplify, { Auth } from "aws-amplify";
+import awsconfig from "../aws-exports";
+import API from "@aws-amplify/api";
+import { withAuthenticator } from "@aws-amplify/ui-react";
 import InputGroup from "../components/InputGroup.js";
 import Table from "../components/Data.js";
+
 import "sweetalert/dist/sweetalert.css";
 
+Amplify.configure(awsconfig);
+
 const dummyData = Array(10)
-  .fill({ mobile_number: "+91 9830955456" })
+  .fill({ mobile_number: "+91 9812312300" })
   .map(({ mobile_number }) => {
     const y = Math.random() > 0.5;
     return {
@@ -25,7 +32,7 @@ const SingleModalContent = ({ status, color, mobile_number }) => (
   </div>
 );
 
-export default function Home() {
+function Home() {
   const [message, setMessage] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,20 +40,41 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setData] = useState([]);
 
+  useEffect(() => {
+    API.configure();
+  }, []);
+
   const handleSingleNumber = async (number) => {
     setLoading(true);
     setMessage(false);
+
+    const user = await Auth.currentAuthenticatedUser();
+    const token = user.signInUserSession.idToken.jwtToken;
+
     const res = await (
-      await fetch("https://jsonplaceholder.typicode.com/todos")
+      await fetch(
+        "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/status",
+        {
+          method: "post",
+          mode: "no-cors",
+          headers: { Authorization: token },
+          body: JSON.stringify({ mobile_number: number }),
+        }
+      )
     ).json();
 
-    console.log({ number, res });
-    if (Math.random() < 0.1) {
-      setError("An error occurred");
-    } else {
-      setModalContent(() => <SingleModalContent {...dummyData[0]} />);
-      setModalVisible(true);
-    }
+    console.log({ res });
+
+    setModalContent(() => (
+      <SingleModalContent
+        {...{
+          mobile_number: res.mobile_number,
+          colour: res.colour === "#FFFFFF" ? "#000000" : res.colour,
+          status: res.message,
+        }}
+      />
+    ));
+    setModalVisible(true);
 
     setLoading(false);
   };
@@ -56,19 +84,33 @@ export default function Home() {
     setMessage(false);
     setError(false);
     const numbers = raw.split(",").map((x) => x.trim());
+    const user = await Auth.currentAuthenticatedUser();
+    const token = user.signInUserSession.idToken.jwtToken;
 
     const res = await (
-      await fetch("https://jsonplaceholder.typicode.com/todos")
-    ).json();
+      await fetch(
+        "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/batch",
+        // GET: "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/refresh",
+        {
+          method: "post",
+          mode: "no-cors",
+          headers: { Authorization: token },
+          body: JSON.stringify({ mobile_numbers: numbers }),
+        }
+      )
+    ).text();
 
-    console.log({ numbers, res });
-    if (Math.random() < 0.1) {
-      setError("An error occurred");
-      setData([]);
-    } else {
-      setMessage("Numbers sent to server. Press refresh to view statuses.");
-      setData(dummyData);
-    }
+    console.log({ res });
+
+    // if (Math.random() < 0.1) {
+    //   setError("An error occurred");
+    //   setData([]);
+    // } else {
+    // setMessage("Numbers sent to server. Press refresh to view statuses.");
+    // setData(dummyData);
+    // }
+    setMessage("Numbers sent to server. Press refresh to view statuses.");
+    setData([]);
 
     setLoading(false);
   };
@@ -78,9 +120,19 @@ export default function Home() {
     setMessage(false);
     setError(false);
 
+    const user = await Auth.currentAuthenticatedUser();
+    const token = user.signInUserSession.idToken.jwtToken;
+
     const res = await (
-      await fetch("https://jsonplaceholder.typicode.com/todos")
-    ).json();
+      await fetch(
+        "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/refresh",
+        // GET: "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/refresh",
+        {
+          mode: "no-cors",
+          headers: { Authorization: token },
+        }
+      )
+    ).text();
 
     console.log({ res });
     if (Math.random() < 0.1) {
@@ -126,3 +178,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default withAuthenticator(Home);

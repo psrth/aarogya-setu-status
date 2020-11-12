@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "parth43d0b492": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}
