@@ -87,22 +87,7 @@ function Home() {
       setLoading(true);
       setMessage(false);
       setError(false);
-      const numbers = raw.split(",").map((x) => x.trim());
-      // const apiName = awsconfig.aws_cloud_logic_custom[0].name; // replace this with your api name.
-      // const path = "/bulk_status"; //replace this with the path you have configured on your API
-      // const user = await Auth.currentAuthenticatedUser();
-      // const token = user.signInUserSession.idToken.jwtToken;
-      // const myInit = {
-      //   response: true,
-      //   headers: {
-      //     Authorization: token,
-      //   },
-      //   body: { numbers }, // replace this with attributes you need
-      // };
-
-      // const res = await API.post(apiName, path, myInit);
-      // console.log({ res });
-
+ 
       const user = await Auth.currentAuthenticatedUser();
       const token = user.signInUserSession.idToken.jwtToken;
 
@@ -111,30 +96,22 @@ function Home() {
           "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod/bulk_status",
           {
             method: "post",
-            mode: "no-cors",
             headers: { Authorization: token },
-            body: JSON.stringify({ numbers: numbers }),
+            body: JSON.stringify({ numbers: raw }),
           }
         )
       ).json();
 
       console.log({ res });
 
-      // if (Math.random() < 0.1) {
-      //   setError("An error occurred");
-      //   setData([]);
-      // } else {
-      // setMessage("Numbers sent to server. Press refresh to view statuses.");
-      // setData(dummyData);
-      // }
       setMessage("Numbers sent to server. Press refresh to view statuses.");
-      setData([]);
+      // setData([]);
 
       setLoading(false);
     } catch (e) {
       console.error(e);
       setError("An error occurred");
-      setData([]);
+      // setData([]);
       setLoading(false);
     }
   };
