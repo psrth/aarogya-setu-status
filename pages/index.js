@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { ToastProvider, useToasts } from "react-toast-notifications";
 import Amplify, { Auth } from "aws-amplify";
 import awsconfig from "../aws-exports";
@@ -8,36 +7,12 @@ import { withAuthenticator } from "@aws-amplify/ui-react";
 import InputGroup from "../components/InputGroup.js";
 import Table from "../components/Data.js";
 
-import "sweetalert/dist/sweetalert.css";
-
 Amplify.configure(awsconfig);
-
-const dummyData = Array(10)
-  .fill({ mobile_number: "+91 9812312300" })
-  .map(({ mobile_number }) => {
-    const y = Math.random() > 0.5;
-    return {
-      mobile_number,
-      message: y ? "COVID positive" : "COVID negative",
-      colour: y ? "#00ff00" : "#ff0000",
-    };
-  });
-
-const SingleModalContent = ({ message, color, mobile_number }) => (
-  <div>
-    <div className={`text-center text-lg`}>{mobile_number}</div>
-    <div className={`text-center my-5`} style={{ color }}>
-      {message}
-    </div>
-  </div>
-);
 
 function Home() {
   const [message, setMessage] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [modalContent, setModalContent] = useState();
-  const [modalVisible, setModalVisible] = useState(false);
   const [data, setData] = useState([]);
   const { addToast } = useToasts();
 
@@ -64,16 +39,6 @@ function Home() {
         )
       ).json();
 
-      // setModalContent(() => (
-      //   <SingleModalContent
-      //     {...{
-      //       mobile_number: res.mobile_number,
-      //       colour: res.colour === "#FFFFFF" ? "#000000" : res.colour,
-      //       message: res.message,
-      //     }}
-      //   />
-      // ));
-      // setModalVisible(true);
       addToast(res.message, {
         appearance: "info",
       });
@@ -108,13 +73,6 @@ function Home() {
 
       console.log({ res });
 
-      // if (Math.random() < 0.1) {
-      //   setError("An error occurred");
-      //   setData([]);
-      // } else {
-      // setMessage("Numbers sent to server. Press refresh to view statuses.");
-      // setData(dummyData);
-      // }
       setMessage("Numbers sent to server. Press refresh to view statuses.");
       setData([]);
 
