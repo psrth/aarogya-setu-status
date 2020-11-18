@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import SweetAlert from "sweetalert-react";
+import { ToastProvider, useToasts } from "react-toast-notifications";
 import Amplify, { Auth } from "aws-amplify";
 import awsconfig from "../aws-exports";
 import API from "@aws-amplify/api";
@@ -39,6 +39,7 @@ function Home() {
   const [modalContent, setModalContent] = useState();
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setData] = useState([]);
+  const { addToast } = useToasts();
 
   useEffect(() => {
     API.configure();
@@ -63,16 +64,19 @@ function Home() {
         )
       ).json();
 
-      setModalContent(() => (
-        <SingleModalContent
-          {...{
-            mobile_number: res.mobile_number,
-            colour: res.colour === "#FFFFFF" ? "#000000" : res.colour,
-            message: res.message,
-          }}
-        />
-      ));
-      setModalVisible(true);
+      // setModalContent(() => (
+      //   <SingleModalContent
+      //     {...{
+      //       mobile_number: res.mobile_number,
+      //       colour: res.colour === "#FFFFFF" ? "#000000" : res.colour,
+      //       message: res.message,
+      //     }}
+      //   />
+      // ));
+      // setModalVisible(true);
+      addToast(res.message, {
+        appearance: "info",
+      });
 
       setLoading(false);
     } catch (e) {
@@ -87,7 +91,7 @@ function Home() {
       setLoading(true);
       setMessage(false);
       setError(false);
- 
+
       const user = await Auth.currentAuthenticatedUser();
       const token = user.signInUserSession.idToken.jwtToken;
 
@@ -104,14 +108,21 @@ function Home() {
 
       console.log({ res });
 
+      // if (Math.random() < 0.1) {
+      //   setError("An error occurred");
+      //   setData([]);
+      // } else {
+      // setMessage("Numbers sent to server. Press refresh to view statuses.");
+      // setData(dummyData);
+      // }
       setMessage("Numbers sent to server. Press refresh to view statuses.");
-      // setData([]);
+      setData([]);
 
       setLoading(false);
     } catch (e) {
       console.error(e);
       setError("An error occurred");
-      // setData([]);
+      setData([]);
       setLoading(false);
     }
   };
@@ -163,17 +174,18 @@ function Home() {
         <div className={`text-center w-full text-sm text-red-600`}>{error}</div>
       )}
 
-      <SweetAlert
-        show={modalVisible}
-        title="Status"
-        html
-        text={renderToStaticMarkup(modalContent)}
-        onConfirm={() => setModalVisible(false)}
-      />
-
       <Table onRefresh={handleRefresh} data={data} />
     </div>
   );
 }
 
-export default withAuthenticator(Home);
+function HomeExport() {
+  return (
+    <ToastProvider>
+      <Home />
+    </ToastProvider>
+  );
+}
+
+export default withAuthenticator(HomeExport);
+

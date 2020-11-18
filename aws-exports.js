@@ -3,16 +3,16 @@
 
 const awsmobile = {
     "aws_project_region": "us-east-1",
-    // "aws_cognito_identity_pool_id": "<AWS ID POOL ID GOES HERE>",
-    // "aws_cognito_region": "<AWS REGION GOES HERE>",
-    // "aws_user_pools_id": "<AWS USER POOLS ID GOES HERE>",
-    // "aws_user_pools_web_client_id": "<AWS WEBCLIENT ID GOES HERE>",
+    "aws_cognito_identity_pool_id": "us-east-1:401b4004-28fa-42b3-83fb-efebf18ec6c2",
+    "aws_cognito_region": "ap-south-1",
+    "aws_user_pools_id": "ap-south-1_A6pe3GZ8s",
+    "aws_user_pools_web_client_id": "oip041imotsorip0u4drv6rhi",
     "oauth": {},
     "aws_cloud_logic": "enable",
     "aws_cloud_logic_custom": [
         {
             "name": "asetuapipoc",
-            // "endpoint": "<AWS ENDPOINT GOES HERE>",
+            "endpoint": "https://suk3v9yzr4.execute-api.ap-south-1.amazonaws.com/prod",
             "region": "ap-south-1"
         }
     ]
